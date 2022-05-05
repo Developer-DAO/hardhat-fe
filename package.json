@@ -1,5 +1,5 @@
 {
-  "name": "hardhat-re",
+  "name": "@developerdao/hardhat-fe",
   "version": "0.0.1",
   "description": "Hardhat plugin to develop smart contracts with fe",
   "repository": "https://github.com/Developer-DAO/hardhat-fe",
@@ -30,9 +30,12 @@
   ],
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/debug": "^4.1.7",
     "@types/fs-extra": "^5.0.4",
+    "@types/glob": "^7.2.0",
     "@types/mocha": "^5.2.6",
     "@types/node": "^8.10.38",
+    "@types/semver": "^7.3.9",
     "chai": "^4.2.0",
     "hardhat": "^2.0.0",
     "mocha": "^7.1.2",
@@ -45,5 +48,9 @@
   },
   "peerDependencies": {
     "hardhat": "^2.0.0"
+  },
+  "dependencies": {
+    "glob": "^8.0.1",
+    "semver": "^7.3.7"
   }
 }
