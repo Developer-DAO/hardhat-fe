@@ -8,6 +8,9 @@
     </p>
 </p>
 
+[![npm version](https://badge.fury.io/js/@developerdao%2Fhardhat-fe.svg)](https://badge.fury.io/js/@developerdao%2Fhardhat-fe)
+[![hardhat](https://hardhat.org/buidler-plugin-badge.svg?1)](https://hardhat.org)
+
 Related [DevDAO RFC](https://forum.developerdao.com/t/rfc-hardhat-fe-hardhat-plugin-to-develop-smart-contracts-with-fe/2000)
 
 ## What
