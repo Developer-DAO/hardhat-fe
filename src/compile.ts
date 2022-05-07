@@ -16,7 +16,7 @@ function compileFileWithFeBinary(fePath: string, fileName: string) {
   const outputFolder = getFeTempOutputFolder();
 
   if (fileName.endsWith(".git")) fileName = fileName.slice(0, -4);
-  if (!fileName.endsWith(".fe")) return;
+  // if (!fileName.endsWith(".fe")) return;
   const compileCommand = `${fePath} ${fileName} ${fe_options} --output-dir ${outputFolder}`;
 
   try {
@@ -46,6 +46,12 @@ function getCompileResultFromBinaryBuild() {
   return compilerResult;
 }
 
+function cleanup() {
+  const outputFolder = getFeTempOutputFolder();
+  const cleanUpCommand = `rm -rf ${outputFolder}`;
+  require("child_process").execSync(cleanUpCommand);
+}
+
 export async function compile(
   fePath: string,
   paths: ProjectPathsConfig,
@@ -56,13 +62,20 @@ export async function compile(
 
   for (const file of files) {
     const sourceName = await localPathToSourceName(paths.root, file);
-    const feSourceCode = fs.readFileSync(file, "utf8");
-    log(feSourceCode);
+    if (file.endsWith("main.fe")) {
+      const moduleName = file.replace("/main.fe", "");
+      console.log(`Compiling module ${moduleName} with Fe binary ${fePath}`);
 
-    console.log(`Compiling ${file} with Fe binary ${fePath}`);
-    compileFileWithFeBinary(fePath, file);
+      compileFileWithFeBinary(fePath, moduleName);
+    } else {
+      const feSourceCode = fs.readFileSync(file, "utf8");
+      log(feSourceCode);
+
+      console.log(`Compiling ${file} with Fe binary ${fePath}`);
+      compileFileWithFeBinary(fePath, file);
+    }
+    
     const compilerResult = getCompileResultFromBinaryBuild();
-
     log("compilerResult:", compilerResult);
 
     for (const key of Object.keys(compilerResult.contracts)) {
@@ -76,9 +89,7 @@ export async function compile(
       await artifacts.saveArtifactAndDebugFile(artifact);
     }
 
-    const outputFolder = getFeTempOutputFolder();
-    const cleanUpCommand = `rm -rf ${outputFolder}`;
-    require("child_process").execSync(cleanUpCommand);
+    cleanup();
   }
 }
 
