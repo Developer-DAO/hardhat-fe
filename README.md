@@ -55,7 +55,7 @@ This plugin does not extend the Hardhat Runtime Environment.
 
 ## Configuration
 
-This plugin adds an optional `vyper` entry to Hardhat's config, which lets you specify the Vyper version to use.
+This plugin adds an optional `fe` entry to Hardhat's config, which lets you specify the Fe version to use.
 
 This is an example of how to set it:
 
@@ -63,6 +63,16 @@ This is an example of how to set it:
 module.exports = {
   fe: {
     version: "0.15.0-alpha",
+  },
+};
+```
+
+Or you can use a customized compiler by specifying the path to the binary instead of downloading from official releases:
+
+```js
+module.exports = {
+  fe: {
+    compilerPath: "absolute_path_to_fe_compiler_binary",
   },
 };
 ```
