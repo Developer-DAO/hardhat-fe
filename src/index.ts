@@ -18,7 +18,7 @@ import { FePluginError } from "./util";
 import { Artifacts, HardhatConfig } from "hardhat/types";
 
 extendConfig((config, userConfig) => {
-  const defaultConfig = userConfig.fe ?? { version: DEFAULT_FE_VERSION};
+  const defaultConfig = userConfig.fe ?? { version: DEFAULT_FE_VERSION };
   config.fe = { ...defaultConfig, ...config.fe };
 });
 
@@ -35,15 +35,25 @@ subtask(TASK_COMPILE_FE)
   .setAction(
     async ({ quiet }: { quiet: boolean }, { artifacts, config, run }) => {
       const feVersion = config.fe.version;
-      const feBuild: FeBuild = await run(TASK_COMPILE_FE_GET_BUILD, {
-        quiet,
-        feVersion,
-      });
+      const compilerPath = config.fe.compilerPath;
+
+      var fePath;
+      if (compilerPath) {
+        fePath = compilerPath;
+        console.log("using local fe executable:", fePath);
+      } else {
+        const feBuild: FeBuild = await run(TASK_COMPILE_FE_GET_BUILD, {
+          quiet,
+          feVersion,
+        });
+        fePath = feBuild.compilerPath;
+        console.log("using downloaded fe executable:", fePath);
+      }
 
       await run(
         TASK_COMPILE_FE_RUN_BINARY,
         {
-          fePath: feBuild.compilerPath,
+          fePath: fePath,
           artifacts: artifacts,
           config: config
         }
