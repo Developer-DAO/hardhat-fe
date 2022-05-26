@@ -18,7 +18,7 @@ import { FePluginError } from "./util";
 import { Artifacts, HardhatConfig } from "hardhat/types";
 
 extendConfig((config, userConfig) => {
-  const defaultConfig = userConfig.fe ?? { version: DEFAULT_FE_VERSION };
+  const defaultConfig = { version: DEFAULT_FE_VERSION };
   config.fe = { ...defaultConfig, ...config.fe };
 });
 
