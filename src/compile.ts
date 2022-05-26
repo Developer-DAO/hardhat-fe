@@ -4,6 +4,7 @@ import { getLogger } from "./util";
 import { ARTIFACT_FORMAT_VERSION } from "./constants";
 import { localPathToSourceName } from "hardhat/utils/source-names";
 import { Artifact, Artifacts, ProjectPathsConfig } from "hardhat/types";
+import { Artifacts as ArtifactsImpl } from "hardhat/internal/artifacts";
 
 const log = getLogger("compile");
 
@@ -78,6 +79,7 @@ export async function compile(
     const compilerResult = getCompileResultFromBinaryBuild();
     log("compilerResult:", compilerResult);
 
+    let contractNames = [];
     for (const key of Object.keys(compilerResult.contracts)) {
       const artifact = getArtifactFromFeOutput(
         sourceName,
@@ -87,7 +89,10 @@ export async function compile(
       log("artifact:", artifact);
       // https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-ethers/src/internal/helpers.ts#L20
       await artifacts.saveArtifactAndDebugFile(artifact);
+      contractNames.push(artifact.contractName);
     }
+    const artifactsImpl = artifacts as ArtifactsImpl;
+    artifactsImpl.addValidArtifacts([{ sourceName: sourceName, artifacts: contractNames }]);
 
     cleanup();
   }
