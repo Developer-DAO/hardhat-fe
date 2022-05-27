@@ -62,7 +62,7 @@ This is an example of how to set it:
 ```js
 module.exports = {
   fe: {
-    version: "0.15.0-alpha",
+    version: "0.17.0-alpha",
   },
 };
 ```
