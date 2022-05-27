@@ -1,0 +1,102 @@
+use std::context::Context
+
+# Poor man's interface
+contract ILockValidator:
+
+    pub fn validate_owns_lock(self, owner: address):
+        revert
+
+struct InvalidIndex:
+    pass
+
+struct NotMovable:
+    pass
+
+const EMPTY_FIELD_MARKER: u8 = 0
+# We don't have dynamically sized arrays. Since the number of moves
+# varies depending on the position of the empty field, we need a marker
+# for invalid moves.
+# TODO: We don't yet support type constructors in consts, hence the function
+fn invalid_field_marker() -> i8:
+    return i8(-1)
+
+contract Game:
+
+    lock_validator: ILockValidator
+    board: Array<u8, 16>
+    moves: Map<u8, Array<i8, 4>>
+
+    pub fn __init__(self, ctx: Context, lock_validator: address, board: Array<u8, 16>):
+        self.lock_validator = ILockValidator(ctx, lock_validator)
+        self.board = board
+        # Map each empty slot to a list of possible moves
+        # It would be nice to have fixed-size maps that work with `const` (baked into code)
+        self.moves[u8(0)] = [i8(1), i8(4), invalid_field_marker(), invalid_field_marker()]
+        self.moves[u8(1)] = [i8(0), i8(2), i8(5), invalid_field_marker()]
+        self.moves[u8(2)] = [i8(1), i8(3), i8(6), invalid_field_marker()]
+        self.moves[u8(3)] = [i8(2), i8(7), invalid_field_marker(), invalid_field_marker()]
+        self.moves[u8(4)] = [i8(0), i8(5), i8(8), invalid_field_marker()]
+        self.moves[u8(5)] = [i8(1), i8(4), i8(6), i8(9)]
+        self.moves[u8(6)] = [i8(2), i8(5), i8(7), i8(10)]
+        self.moves[u8(7)] = [i8(3), i8(6), i8(11), invalid_field_marker()]
+        self.moves[u8(8)] = [i8(4), i8(9), i8(12), invalid_field_marker()]
+        self.moves[u8(9)] = [i8(5), i8(8), i8(10), i8(13)]
+        self.moves[u8(10)] = [i8(6), i8(9), i8(11), i8(14)]
+        self.moves[u8(11)] = [i8(7), i8(10), i8(15), invalid_field_marker()]
+        self.moves[u8(12)] = [i8(8), i8(13), invalid_field_marker(), invalid_field_marker()]
+        self.moves[u8(13)] = [i8(9), i8(12), i8(14), invalid_field_marker()]
+        self.moves[u8(14)] = [i8(10), i8(13), i8(15), invalid_field_marker()]
+        self.moves[u8(15)] = [i8(11), i8(14), invalid_field_marker(), invalid_field_marker()]
+
+    pub fn get_board(self) -> Array<u8, 16>:
+        return self.board.to_mem()
+
+    pub fn is_solved(self) -> bool:
+        let index: u256 = 0
+        let current_board: Array<u8, 16> = self.board.to_mem()
+        # Workaround for: https://github.com/ethereum/fe/issues/528
+        for _field in current_board:
+            if current_board[index] != get_winning_state()[index]:
+                return false
+            index += 1
+
+        return true
+
+    pub fn move_field(self, ctx: Context, index: u8):
+        self.lock_validator.validate_owns_lock(owner: ctx.msg_sender())
+
+        if not self.is_valid_index(index):
+            revert InvalidIndex()
+        else:
+            let movable_fields: Array<i8, 4> = self.moves[self.get_index_of_empty_field()].to_mem()
+            if not is_in(num:index, values: movable_fields):
+                revert NotMovable()
+            else:
+                let empty_field_index: u8 = self.get_index_of_empty_field()
+                let field_value: u8 = self.board[u256(index)]
+                self.board[u256(index)] = EMPTY_FIELD_MARKER
+                self.board[u256(empty_field_index)] = field_value
+
+    fn get_index_of_empty_field(self) -> u8:
+        let index: u8 = 0
+        let current_board: Array<u8, 16> = self.board.to_mem()
+        for field in current_board:
+            if field == 0:
+                break
+            else:
+                index += 1
+
+        return index
+
+    fn get_winning_state() -> Array<u8, 16>:
+        # TODO: Make this a constant when complex constants are supported
+        return [u8(1), u8(2), u8(3), u8(4), u8(5), u8(6), u8(7), u8(8), u8(9), u8(10), u8(11), u8(12), u8(13), u8(14), u8(15), 0]
+
+    fn is_valid_index(self, index: u8) -> bool:
+        return index >= 0 and index <= 15
+
+    fn is_in(num: u8, values: Array<i8, 4>) -> bool:
+        for val in values:
+            if val == i8(num):
+                return true
+        return false
