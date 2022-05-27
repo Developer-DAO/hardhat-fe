@@ -53,6 +53,15 @@ function cleanup() {
   require("child_process").execSync(cleanUpCommand);
 }
 
+function isIngotProject(files: string[]): [boolean, string] {
+  for (const file of files) {
+    if (file.endsWith("main.fe")) {
+      return [true, file.replace("/main.fe", "")];
+    }
+  }
+  return [false, ""];
+}
+
 export async function compile(
   fePath: string,
   paths: ProjectPathsConfig,
@@ -61,21 +70,13 @@ export async function compile(
   const files = await getFeSources(paths);
   log(files);
 
-  for (const file of files) {
-    const sourceName = await localPathToSourceName(paths.root, file);
-    if (file.endsWith("main.fe")) {
-      const moduleName = file.replace("/main.fe", "");
-      console.log(`Compiling module ${moduleName} with Fe binary ${fePath}`);
+  const [isIngot, ingotModule] = isIngotProject(files);
 
-      compileFileWithFeBinary(fePath, moduleName);
-    } else {
-      const feSourceCode = fs.readFileSync(file, "utf8");
-      log(feSourceCode);
+  if (isIngot) {
+    const sourceName = await localPathToSourceName(paths.root, `${ingotModule}/main.fe`);
+    console.log(`Compiling module ${ingotModule} with Fe binary ${fePath}`);
+    compileFileWithFeBinary(fePath, ingotModule);
 
-      console.log(`Compiling ${file} with Fe binary ${fePath}`);
-      compileFileWithFeBinary(fePath, file);
-    }
-    
     const compilerResult = getCompileResultFromBinaryBuild();
     log("compilerResult:", compilerResult);
 
@@ -95,6 +96,32 @@ export async function compile(
     artifactsImpl.addValidArtifacts([{ sourceName: sourceName, artifacts: contractNames }]);
 
     cleanup();
+  } else {
+    for (const file of files) {
+      const sourceName = await localPathToSourceName(paths.root, file);
+      console.log(`Compiling ${file} with Fe binary ${fePath}`);
+      compileFileWithFeBinary(fePath, file);
+      
+      const compilerResult = getCompileResultFromBinaryBuild();
+      log("compilerResult:", compilerResult);
+  
+      let contractNames = [];
+      for (const key of Object.keys(compilerResult.contracts)) {
+        const artifact = getArtifactFromFeOutput(
+          sourceName,
+          key,
+          compilerResult.contracts[key]
+        );
+        log("artifact:", artifact);
+        // https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-ethers/src/internal/helpers.ts#L20
+        await artifacts.saveArtifactAndDebugFile(artifact);
+        contractNames.push(artifact.contractName);
+      }
+      const artifactsImpl = artifacts as ArtifactsImpl;
+      artifactsImpl.addValidArtifacts([{ sourceName: sourceName, artifacts: contractNames }]);
+  
+      cleanup();
+    }
   }
 }
 
