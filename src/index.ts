@@ -61,6 +61,7 @@ subtask(TASK_COMPILE_FE)
     }
   );
 
+//真正compile的地方 在里面写Cache
 subtask(TASK_COMPILE_FE_RUN_BINARY)
   .addParam("fePath", undefined, undefined, types.string)
   .setAction(

@@ -3,6 +3,10 @@ export interface FeBuild {
   compilerPath: string;
 }
 
+export interface FeConfig {
+  version: string;
+}
+
 export enum CompilerPlatform {
   LINUX = "amd64",
   MACOS = "mac",
