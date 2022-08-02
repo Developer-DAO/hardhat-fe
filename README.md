@@ -1,7 +1,4 @@
 <p align="center">
-    <a href="https://developerdao.com">
-    <img src="https://raw.githubusercontent.com/Developer-DAO/developerdao.com/main/public/logo512.png" alt="logo" width="80" height="80"/>
-    </a>
     <h2 align="center">hardhat-fe</h2>
     <p align="center">
     <a href="https://hardhat.org">Hardhat</a> plugin to develop smart contracts with <a href="https://github.com/ethereum/fe">Fe</a>
@@ -62,7 +59,7 @@ This is an example of how to set it:
 ```js
 module.exports = {
   fe: {
-    version: "0.17.0-alpha",
+    version: "0.19.1-alpha",
   },
 };
 ```
@@ -76,6 +73,8 @@ module.exports = {
   },
 };
 ```
+
+Otherwise, if you leave the `fe` config entry blank, the plugin will use the default version of Fe compiler which currently is `0.19.1-alpha`
 
 ## Usage
 

@@ -1,6 +1,6 @@
 {
   "name": "@developerdao/hardhat-fe",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "Hardhat plugin to develop smart contracts with fe",
   "repository": {
     "type": "git",
