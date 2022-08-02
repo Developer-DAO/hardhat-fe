@@ -1,7 +1,7 @@
 import path from "path";
 import * as assert from "assert";
 import * as fsExtra from "fs-extra";
-import { DEFAULT_FE_VERSION } from "../src/constants";
+import { DEFAULT_FE_VERSION, QUARTZ_VERSION } from "../src/constants";
 import { useFixtureProject, useEnvironment, assertFileExists } from "./helpers";
 import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 
@@ -41,7 +41,7 @@ describe("Default project tests", () => {
     useEnvironment();
 
     it("The specified version must be used", function () {
-      assert.equal(this.hre.config.fe.version, DEFAULT_FE_VERSION);
+      assert.equal(this.hre.config.fe.version, QUARTZ_VERSION);
     });
     it("should compile and emit artifacts", async function () {
       await this.hre.run(TASK_COMPILE);
@@ -57,7 +57,7 @@ describe("Default project tests", () => {
     useEnvironment();
 
     it("The specified version must be used", function () {
-      assert.equal(this.hre.config.fe.version, DEFAULT_FE_VERSION);
+      assert.equal(this.hre.config.fe.version, QUARTZ_VERSION);
     });
     it("should compile and emit artifacts", async function () {
       await this.hre.run(TASK_COMPILE);
@@ -68,6 +68,22 @@ describe("Default project tests", () => {
       assertFileExists(path.join("artifacts", "contracts", "Game_i8.fe", "ILockValidator.json"));
       assertFileExists(path.join("artifacts", "contracts", "Game.fe", "Game.json"));
       assertFileExists(path.join("artifacts", "contracts", "Game.fe", "ILockValidator.json"));
+    });
+  });
+  describe("compile with 0.19.1-alpha 'Sunstone' compiler", function () {
+    this.timeout(15000);
+    useFixtureProject("sunstone_compiler");
+    useEnvironment();
+
+    it("The specified version must be used", function () {
+      assert.equal(this.hre.config.fe.version, DEFAULT_FE_VERSION);
+    });
+    it("should compile and emit artifacts", async function () {
+      await this.hre.run(TASK_COMPILE);
+
+      assertFileExists(path.join("artifacts", "contracts", "main.fe", "FooBar.json"));
+      assertFileExists(path.join("artifacts", "contracts", "main.fe", "FooBarBing.json"));
+      assertFileExists(path.join("artifacts", "contracts", "main.fe", "GuestBook.json"));
     });
   });
 });

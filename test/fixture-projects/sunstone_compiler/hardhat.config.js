@@ -3,6 +3,6 @@ const constants = require("../../../src/constants");
 
 module.exports = {
   fe: {
-    version: constants.QUARTZ_VERSION
+    version: constants.DEFAULT_FE_VERSION,
   }
 };

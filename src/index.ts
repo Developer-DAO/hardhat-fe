@@ -54,6 +54,7 @@ subtask(TASK_COMPILE_FE)
         TASK_COMPILE_FE_RUN_BINARY,
         {
           fePath: fePath,
+          feVersion: feVersion,
           artifacts: artifacts,
           config: config
         }
@@ -63,17 +64,20 @@ subtask(TASK_COMPILE_FE)
 
 subtask(TASK_COMPILE_FE_RUN_BINARY)
   .addParam("fePath", undefined, undefined, types.string)
+  .addParam("feVersion", undefined, undefined, types.string)
   .setAction(
     async ({
       fePath,
+      feVersion,
       artifacts,
       config
     }: {
       fePath: string;
-      artifacts: Artifacts,
-      config: HardhatConfig
+      feVersion: string;
+      artifacts: Artifacts;
+      config: HardhatConfig;
     }) => {
-      await compile(fePath, config.paths, artifacts);
+      await compile(fePath, feVersion, config.paths, artifacts);
     }
   );
 

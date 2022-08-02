@@ -12,13 +12,25 @@ function getFeTempOutputFolder() {
   return process.cwd() + "/fe_output";
 }
 
-function compileFileWithFeBinary(fePath: string, fileName: string) {
+function isLegacyVersion(feVersion: string) {
+  let [major, minor] = feVersion.split("-")[0].split(".");
+  // versions earlier before v0.18.0-alpha
+  return major == "0" && (parseInt(minor) <= 18);
+}
+
+function compileFileWithFeBinary(fePath: string, feVersion: string, fileName: string) {
   const fe_options = "--overwrite --emit=abi,bytecode";
   const outputFolder = getFeTempOutputFolder();
 
   if (fileName.endsWith(".git")) fileName = fileName.slice(0, -4);
   // if (!fileName.endsWith(".fe")) return;
-  const compileCommand = `${fePath} ${fileName} ${fe_options} --output-dir ${outputFolder}`;
+
+  var compileCommand;
+  if (isLegacyVersion(feVersion)) {
+    compileCommand = `${fePath} ${fileName} ${fe_options} --output-dir ${outputFolder}`;
+  } else {
+    compileCommand = `${fePath} build ${fileName} ${fe_options} --output-dir ${outputFolder}`;
+  }
 
   try {
     log(compileCommand);
@@ -64,6 +76,7 @@ function isIngotProject(files: string[]): [boolean, string] {
 
 export async function compile(
   fePath: string,
+  feVersion: string,
   paths: ProjectPathsConfig,
   artifacts: Artifacts
 ) {
@@ -75,7 +88,7 @@ export async function compile(
   if (isIngot) {
     const sourceName = await localPathToSourceName(paths.root, `${ingotModule}/main.fe`);
     console.log(`Compiling module ${ingotModule} with Fe binary ${fePath}`);
-    compileFileWithFeBinary(fePath, ingotModule);
+    compileFileWithFeBinary(fePath, feVersion, ingotModule);
 
     const compilerResult = getCompileResultFromBinaryBuild();
     log("compilerResult:", compilerResult);
@@ -100,7 +113,7 @@ export async function compile(
     for (const file of files) {
       const sourceName = await localPathToSourceName(paths.root, file);
       console.log(`Compiling ${file} with Fe binary ${fePath}`);
-      compileFileWithFeBinary(fePath, file);
+      compileFileWithFeBinary(fePath, feVersion, file);
       
       const compilerResult = getCompileResultFromBinaryBuild();
       log("compilerResult:", compilerResult);

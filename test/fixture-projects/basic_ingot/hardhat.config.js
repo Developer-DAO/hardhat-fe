@@ -7,6 +7,6 @@ module.exports = {
     sources: "./src",
   },
   fe: {
-    version: constants.DEFAULT_FE_VERSION,
+    version: constants.QUARTZ_VERSION,
   },
 };
